@@ -7,3 +7,4 @@ vokaturi_interface/*.wav
 OpenVokaturi
 
 node_modules/**
+.DS_Store
