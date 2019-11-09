@@ -47,7 +47,14 @@
         mediaRecorder.requestData()
         var audio_blob = new Blob(recordedChunks, {type:'audio/ogg'})
         var audio = new FormData();
-        audio.append('audio', audio_blob, 'blobby.txt');
+        audio.append('audio', audio_blob);
+        fetch('/', {
+          method : 'POST',
+          body: audio
+        }).then(response =>{
+          console.log(response.blob())
+          return response.blob()
+        })
       },5000)
     };
 
