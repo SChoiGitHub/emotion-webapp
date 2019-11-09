@@ -1,7 +1,6 @@
 {
   "name": "emotion-webapp",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,5 +14,9 @@
   "bugs": {
     "url": "https://github.com/SChoiGitHub/emotion-webapp/issues"
   },
-  "homepage": "https://github.com/SChoiGitHub/emotion-webapp#readme"
+  "homepage": "https://github.com/SChoiGitHub/emotion-webapp#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
