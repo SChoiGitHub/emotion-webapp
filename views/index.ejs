@@ -60,8 +60,9 @@ function runningAverage(input_data){
     return aggregated_data;
 }
 
-function processEmotions(data){
-  if(!("error" in data)){
+function processEmotions(new_data){
+  if(!("error" in new_data)){
+    var data = runningAverage(new_data)
     console.log(data)
 	var anger = data["anger"];
 	var fear = data["fear"];
