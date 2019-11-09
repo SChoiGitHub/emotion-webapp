@@ -37,7 +37,6 @@ app.get('/', function (req, res) {
 })
 
 app.post('/analyze',upload.single('audio'), function (req, res, next) {
-  fs.writeFile("./gotit.ogg",req.files[0].buffer, (err) => {res.send("no")})
   res.send("OK")
 })
 
