@@ -1,0 +1,14 @@
+html{
+    border: 1px solid grey;
+    background-color: honeydew;
+}
+h1{
+    color: burlywood;
+}
+
+.col-centered{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }

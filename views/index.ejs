@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel='stylesheet' type='text/css' href='/index.css' />
+    <link rel='stylesheet' type='text/css' href='/animate.css' />
+
+    <title>Emo Web App</title>
+    <script src="https://kit.fontawesome.com/f764015f1b.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
+
+  </head>
+ 
+  <body id="body">
+    <div class = "container">
+    <h1 class = "text-center">Emo Web App</h1>   
+ 
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
+  </body>
+
+  <script>
+    const MS_BETWEEN_UPDATES = 3000
+    const EMOTION_HISTORY_LIMIT = 4
+    var emotion_history = []
+    var recordedChunks = [];
+    var mediaRecorder;
+    var res
+    var options = {mimeType: 'audio/webm'};
+
+function runningAverage(input_data){
+    emotion_history.push(input_data)
+    if(emotion_history.length > EMOTION_HISTORY_LIMIT){
+      emotion_history=emotion_history.slice(1)
+    }
+    var aggregated_data = {
+	anger:0.0,
+	fear:0.0,
+	happiness:0.0,
+	neutral:0.0,
+	sadness:0.0,
+    };
+    emotion_history.forEach(item =>{
+      aggregated_data["anger"] += item["anger"]
+      aggregated_data["fear"] += item["fear"]
+      aggregated_data["happiness"] += item["happiness"]
+      aggregated_data["neutral"] += item["neutral"]
+      aggregated_data["sadness"] += item["sadness"]
+    })
+    aggregated_data["anger"] /= emotion_history.length
+    aggregated_data["fear"] /= emotion_history.length
+    aggregated_data["happiness"] /= emotion_history.length
+    aggregated_data["neutral"] /= emotion_history.length
+    aggregated_data["sadness"] /= emotion_history.length
+    return aggregated_data;
+}
+
+function processEmotions(new_data){
+  if(!("error" in new_data)){
+    var data = runningAverage(new_data)
+    console.log(data)
+	var anger = data["anger"];
+	var fear = data["fear"];
+	var happy = data["happiness"];
+	var sad = data["sadness"];
+	var neutral = data["neutral"];
+	var mood = Math.max(anger,fear,happy,sad,neutral);
+	if(mood==anger){
+		$("#body").css("background-color","red")
+	}
+	else if(mood==fear){
+		$("#body").css("background-color","purple")
+	}
+	else if(mood==happy){
+		$("#body").css("background-color","yellow")
+	}
+	else if(mood==sad){
+		$("#body").css("background-color","blue")
+	}
+	else if(mood==neutral){
+		$("#body").css("background-color","grey")
+	}
+	else{
+		console.log("processEmotions Error");
+	}
+    /*if(data["anger"] > 0.5){//prototype code
+      $("#body").css("background-color","red")
+
+    }*/
+  }
+}
+
+    const handleSuccess = function(stream) {
+      mediaRecorder = new MediaRecorder(stream, options);
+      mediaRecorder.ondataavailable = function(e) {
+        if (e.data.size > 0) {
+          recordedChunks.push(e.data);
+		if(recordedChunks.length != 0){
+		  var audio_blob = new Blob(recordedChunks, {type:'audio/webm'})
+		  var audio = new FormData();
+		  audio.append('audio', audio_blob);
+		  fetch('/analyze', {
+		    method : 'POST',
+		    body: audio
+		  }).then(r =>{
+		    r.json().then(data => {
+		      processEmotions(data)
+		    })
+		  })
+		  recordedChunks = [];
+		}
+        }
+      }
+      mediaRecorder.start();
+
+      setInterval( () => {
+        mediaRecorder.stop()
+        mediaRecorder.start()
+      },MS_BETWEEN_UPDATES)
+    };
+
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(handleSuccess);
+  </script>
+</html>
