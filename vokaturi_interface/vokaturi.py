@@ -14,9 +14,9 @@ except:
 
 app = Flask(__name__)
 
-def getProbabilities(file):
-    wav_file = file+".wav"
-    subprocess.Popen(['ffmpeg', '-i', file, wav_file])
+def getProbabilities(_file):
+    wav_file = _file+".wav"
+    subprocess.call(['ffmpeg', '-i', _file, wav_file])
 
 
     (sample_rate, samples) = wav_read(wav_file)
@@ -42,7 +42,7 @@ def getProbabilities(file):
         data["error"] = "Quality Too Low"
     voice.destroy()
 
-    subprocess.call(['rm', file, wav_file])
+    subprocess.Popen(['rm', _file, wav_file])
     return data
 
 @app.route('/vokaturi/<path:wav_file>')

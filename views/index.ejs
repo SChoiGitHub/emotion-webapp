@@ -32,6 +32,7 @@
   <script>
     var recordedChunks = [];
     var mediaRecorder;
+    var res
     var options = {mimeType: 'audio/ogg'};
     const handleSuccess = function(stream) {
       mediaRecorder = new MediaRecorder(stream, options);
@@ -51,10 +52,10 @@
         fetch('/analyze', {
           method : 'POST',
           body: audio
-        }).then(response =>{
-
-          console.log("Upload")
-          return response
+        }).then(r =>{
+          r.json().then(data => {
+            console.log(data)
+          })
         })
         recordedChunks = [];
         mediaRecorder.start()

@@ -15,7 +15,7 @@ function getEmotionData(filename){
     //TODO: This url will change with deployment
     axios.get("http://localhost:3000/vokaturi/"+filename)
     .then(response => {
-      resolve(response)
+      resolve(response.data)
     })
     .catch(() => {
       reject("error")
@@ -37,7 +37,13 @@ app.get('/', function (req, res) {
 })
 
 app.post('/analyze',upload.single('audio'), function (req, res, next) {
-  res.send("OK")
+  console.log(req.file)
+  getEmotionData(req.file["filename"])
+  .then(r =>{
+    console.log(r)
+    res.json(r)
+  })
+  .catch( () => {res.send("h97t32rniogju903t82hiywb")})
 })
 
 app.get('*', function(req, res) { 
