@@ -2,12 +2,12 @@ from flask import Flask, escape, request, jsonify
 from os import environ
 from scipy.io.wavfile import read as wav_read
 import sys
-sys.path.append("OpenVokaturi/api")
+sys.path.append("vokaturi_interface/OpenVokaturi/api")
 import Vokaturi
 
 
 try:
-    Vokaturi.load("OpenVokaturi/lib/open/linux/OpenVokaturi-3-3-linux64.so")
+    Vokaturi.load("vokaturi_interface/OpenVokaturi/lib/open/linux/OpenVokaturi-3-3-linux64.so")
 except:
     sys.exit(0)
 
@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 @app.route('/vokaturi/<string:wav_file>')
 def vokaturi(wav_file):
-    (sample_rate, samples) = wav_read(wav_file)
+    (sample_rate, samples) = wav_read("vokaturi_interface/"+wav_file)
     buffer_length = len(samples)
     c_buffer = Vokaturi.SampleArrayC(buffer_length)
     if samples.ndim == 1:  # mono
