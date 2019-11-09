@@ -33,9 +33,8 @@
     var res
     var options = {mimeType: 'audio/webm'};
 
-function processEmotions(data){
-  if(!("error" in data)){
-    emotion_history.push(data)
+function runningAverage(input_data){
+    emotion_history.push(input_data)
     if(emotion_history.length > EMOTION_HISTORY_LIMIT){
       emotion_history=emotion_history.slice(1)
     }
@@ -58,9 +57,13 @@ function processEmotions(data){
     aggregated_data["happiness"] /= emotion_history.length
     aggregated_data["neutral"] /= emotion_history.length
     aggregated_data["sadness"] /= emotion_history.length
+    return aggregated_data;
+}
 
-    console.log(data)
-    console.log(aggregated_data)
+function processEmotions(data){
+  if(!("error" in data)){
+    emotion_history.push(data)
+    averagemood = runningAverage(input_data);
   }
 }
 
