@@ -62,8 +62,35 @@ function runningAverage(input_data){
 
 function processEmotions(data){
   if(!("error" in data)){
-    emotion_history.push(data)
-    averagemood = runningAverage(input_data);
+    console.log(data)
+	var anger = data["anger"];
+	var fear = data["fear"];
+	var happy = data["happiness"];
+	var sad = data["sadness"];
+	var neutral = data["neutral"];
+	var mood = Math.max(anger,fear,happy,sad,neutral);
+	if(mood==anger){
+		$("#body").css("background-color","red")
+	}
+	else if(mood==fear){
+		$("#body").css("background-color","green")//find more suitable color
+	}
+	else if(mood==happy){
+		$("#body").css("background-color","yellow")
+	}
+	else if(mood==sad){
+		$("#body").css("background-color","purple")
+	}
+	else if(mood==neutral){
+		$("#body").css("background-color","grey")
+	}
+	else{
+		console.log("processEmotions Error");
+	}
+    /*if(data["anger"] > 0.5){//prototype code
+      $("#body").css("background-color","red")
+
+    }*/
   }
 }
 
