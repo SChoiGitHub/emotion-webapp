@@ -3,23 +3,30 @@ var path = require('path');
 const app = express()
 const axios = require('axios')
 const multer = require('multer')
-const upload = multer({ dest: './' })
-const fs = require('fs')
-
-
-
+const upload = multer({storage: multer.memoryStorage()})
 
 
 function getEmotionData(filename){
   return new Promise((resolve,reject) => {
-    //TODO: This url will change with deployment
-    axios.get("http://localhost:3000/vokaturi/"+filename)
-    .then(response => {
-      resolve(response.data)
-    })
-    .catch(() => {
+    const blob = bucket.file(req.file.originalname);
+    const blobStream = blob.createWriteStream({
+      resumable: false,
+    });
+    blobStream.on('error', err => {
       reject("error")
-    })
+    });
+    
+    blobStream.on('finish', () => {
+      axios.get(format(`http://vokaturi-dot-emotionwebapp.appspot.com/vokaturi/${bucket.name}/${blob.name}`))
+      .then(response => {
+        resolve(response.data)
+      })
+      .catch(() =>{
+        reject("error")
+      })
+    });
+
+    blobStream.end(req.file.buffer);
   }) 
 }
 
@@ -38,7 +45,7 @@ app.get('/', function (req, res) {
 
 app.post('/analyze',upload.single('audio'), function (req, res, next) {
   console.log(req.file)
-  getEmotionData(req.file["filename"])
+  getEmotionData(req.file.originalname)
   .then(r =>{
     res.json(r)
   })
