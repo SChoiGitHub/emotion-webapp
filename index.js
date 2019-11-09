@@ -1,14 +1,16 @@
 const express = require('express')
 var path = require('path');
+var bodyParser = require("body-parser");
 
-const recorder = require('node-record-lpcm16')
-const fs = require('fs')
+const recorder = require('node-record-lpcm16');
+const fs = require('fs');
 
 const app = express()
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, "/public")));
-app.use(express.urlencoded())
+
+
 
 app.get('/', function (req, res) {  
     res.render('index')
@@ -24,13 +26,17 @@ app.post("/speak", function(req,res){
         const file = fs.createWriteStream('test.wav', { encoding: 'binary' })
  
         recorder.record({
-        sampleRate: 44100
+        sampleRate: 16000
         })
         .stream()
         .pipe(file)
+
+        setTimeout(() => {
+          recording.stop()
+        }, 3000)
 
         res.redirect('/');
     });
 
    
-app.listen(9010)
+app.listen(9020)
