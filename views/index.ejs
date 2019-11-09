@@ -43,7 +43,7 @@
       mediaRecorder.start();
 
       setInterval( () => {
-        mediaRecorder.requestData()
+        mediaRecorder.stop()
         var audio_blob = new Blob(recordedChunks, {type:'audio/ogg'})
         localStorage.test = audio_blob
         var audio = new FormData();
@@ -57,6 +57,7 @@
           return response
         })
         recordedChunks = [];
+        mediaRecorder.start()
       },5000)
     };
 
