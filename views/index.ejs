@@ -25,6 +25,9 @@
   </body>
 
   <script>
+    const MS_BETWEEN_UPDATES = 3000
+    const EMOTION_HISTORY_LIMIT = 4
+    var emotion_history = []
     var recordedChunks = [];
     var mediaRecorder;
     var res
@@ -32,11 +35,32 @@
 
 function processEmotions(data){
   if(!("error" in data)){
-    console.log(data)
-    if(data["anger"] > 0.5){
-      $("#body").css("background-color","red")
-
+    emotion_history.push(data)
+    if(emotion_history.length > EMOTION_HISTORY_LIMIT){
+      emotion_history=emotion_history.slice(1)
     }
+    var aggregated_data = {
+	anger:0.0,
+	fear:0.0,
+	happiness:0.0,
+	neutral:0.0,
+	sadness:0.0,
+    };
+    emotion_history.forEach(item =>{
+      aggregated_data["anger"] += item["anger"]
+      aggregated_data["fear"] += item["fear"]
+      aggregated_data["happiness"] += item["happiness"]
+      aggregated_data["neutral"] += item["neutral"]
+      aggregated_data["sadness"] += item["sadness"]
+    })
+    aggregated_data["anger"] /= emotion_history.length
+    aggregated_data["fear"] /= emotion_history.length
+    aggregated_data["happiness"] /= emotion_history.length
+    aggregated_data["neutral"] /= emotion_history.length
+    aggregated_data["sadness"] /= emotion_history.length
+
+    console.log(data)
+    console.log(aggregated_data)
   }
 }
 
@@ -66,7 +90,7 @@ function processEmotions(data){
       setInterval( () => {
         mediaRecorder.stop()
         mediaRecorder.start()
-      },5000)
+      },MS_BETWEEN_UPDATES)
     };
 
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
