@@ -1,1 +1,10 @@
+package-lock.json
 
+vokaturi_interface/OpenVokaturi
+vokaturi_interface/__pycache__
+vokaturi_interface/*.wav
+
+OpenVokaturi
+
+node_modules/**
+.DS_Store
