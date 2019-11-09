@@ -2,40 +2,31 @@ const express = require('express')
 var path = require('path');
 const app = express()
 const axios = require('axios')
-const multer = require('multer')
+const Multer = require('multer')
 const {Storage} = require('@google-cloud/storage');
 
+const storage = new Storage();
+
 const CLOUD_BUCKET = "gs://emotionwebapp";
-
-const storage = new Storage({
-  projectId: "emotionwebapp"
-});
-
 const bucket = storage.bucket(CLOUD_BUCKET);
-const upload = multer({storage: multer.memoryStorage()})
+
+const upload = Multer({ storage: Multer.memoryStorage()})
+
 
 
 function getEmotionData(blob_name){
   return new Promise((resolve,reject) => {
-    const blob = bucket.file(blob_name);
-    const blobStream = blob.createWriteStream({
-      resumable: false,
-    });
-    blobStream.on('error', err => {
-      reject("error")
-    });
-    
-    blobStream.on('finish', () => {
-      axios.get(format(`http://vokaturi-dot-emotionwebapp.appspot.com/vokaturi/${blob_name}`))
-      .then(response => {
-        resolve(response.data)
-      })
-      .catch(() =>{
-        reject("error")
-      })
-    });
+    const blob = bucket.file(blob_name)
+    const blobStream = blob.createWriteStream();
 
-    blobStream.end(req.file.buffer);
+    blobStream.on('err', () => {
+      reject({a:"2214"})
+    });
+    blobStream.on('finish', () => {
+      console.log(`https://storage.googleapis.com/`,bucket.name,blob.name);
+      resolve({a:"2"})
+    });
+    blobStream.end(blob_name);
   }) 
 }
 
@@ -54,7 +45,7 @@ app.get('/', function (req, res) {
 
 app.post('/analyze',upload.single('audio'), function (req, res, next) {
   console.log(req.file)
-  getEmotionData(req.file["filename"])
+  getEmotionData(req.file.originalname)
   .then(r =>{
     res.json(r)
   })
