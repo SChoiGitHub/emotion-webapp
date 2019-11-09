@@ -3,6 +3,14 @@ var path = require('path');
 const app = express()
 const axios = require('axios')
 
+
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 function getEmotionData(filename){
   return new Promise((resolve,reject) => {
     //TODO: This url will change with deployment
