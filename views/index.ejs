@@ -43,18 +43,20 @@
       mediaRecorder.start();
 
       setInterval( () => {
-        recordedChunks = [];
         mediaRecorder.requestData()
         var audio_blob = new Blob(recordedChunks, {type:'audio/ogg'})
+        localStorage.test = audio_blob
         var audio = new FormData();
         audio.append('audio', audio_blob, 'audio.ogg');
-        console.log("Up")
         fetch('/analyze', {
           method : 'POST',
           body: audio
         }).then(response =>{
+
+          console.log("Upload")
           return response
         })
+        recordedChunks = [];
       },5000)
     };
 
