@@ -40,10 +40,8 @@ app.post('/analyze',upload.single('audio'), function (req, res, next) {
   console.log(req.file)
   getEmotionData(req.file["filename"])
   .then(r =>{
-    console.log(r)
     res.json(r)
   })
-  .catch( () => {res.send("h97t32rniogju903t82hiywb")})
 })
 
 app.get('*', function(req, res) { 

@@ -14,14 +14,9 @@
 
   </head>
  
-  <body>
+  <body id="body">
     <div class = "container">
-    <h1 class = "text-center">Emo Web App</h1>
-
-    
-    <a id="download">Download</a>
-    <button id="stop">Stop</button>
-   
+    <h1 class = "text-center">Emo Web App</h1>   
  
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
@@ -33,31 +28,43 @@
     var recordedChunks = [];
     var mediaRecorder;
     var res
-    var options = {mimeType: 'audio/ogg'};
+    var options = {mimeType: 'audio/webm'};
+
+function processEmotions(data){
+  if(!("error" in data)){
+    console.log(data)
+    if(data["anger"] > 0.5){
+      $("#body").css("background-color","red")
+
+    }
+  }
+}
+
     const handleSuccess = function(stream) {
       mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorder.ondataavailable = function(e) {
         if (e.data.size > 0) {
           recordedChunks.push(e.data);
+		if(recordedChunks.length != 0){
+		  var audio_blob = new Blob(recordedChunks, {type:'audio/webm'})
+		  var audio = new FormData();
+		  audio.append('audio', audio_blob);
+		  fetch('/analyze', {
+		    method : 'POST',
+		    body: audio
+		  }).then(r =>{
+		    r.json().then(data => {
+		      processEmotions(data)
+		    })
+		  })
+		  recordedChunks = [];
+		}
         }
-      };
+      }
       mediaRecorder.start();
 
       setInterval( () => {
         mediaRecorder.stop()
-        var audio_blob = new Blob(recordedChunks, {type:'audio/ogg'})
-        localStorage.test = audio_blob
-        var audio = new FormData();
-        audio.append('audio', audio_blob, 'audio.ogg');
-        fetch('/analyze', {
-          method : 'POST',
-          body: audio
-        }).then(r =>{
-          r.json().then(data => {
-            console.log(data)
-          })
-        })
-        recordedChunks = [];
         mediaRecorder.start()
       },5000)
     };
