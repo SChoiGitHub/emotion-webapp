@@ -3,3 +3,5 @@ package-lock.json
 vokaturi_interface/OpenVokaturi
 vokaturi_interface/__pycache__
 vokaturi_interface/*.wav
+
+node_modules
