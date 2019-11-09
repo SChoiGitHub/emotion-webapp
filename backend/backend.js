@@ -3,7 +3,6 @@ var path = require('path');
 const app = express()
 const axios = require('axios')
 const multer = require('multer')
-const upload = multer({ dest: './' })
 
 
 
@@ -35,7 +34,7 @@ app.get('/', function (req, res) {
   res.render('index')
 })
 
-app.post('/analyze',upload.single('audio'), function (req, res, next) {
+app.post('/analyze',multer.any(), function (req, res, next) {
   fs.writeFile("./gotit.ogg",req.files[0].buffer, (err) => {res.send("no")})
   res.send("OK")
 })

@@ -47,9 +47,9 @@
         mediaRecorder.requestData()
         var audio_blob = new Blob(recordedChunks, {type:'audio/ogg'})
         var audio = new FormData();
-        console.log(response.audio_blob())
         audio.append('audio', audio_blob);
-        fetch('/', {
+        console.log("Up")
+        fetch('/analyze', {
           method : 'POST',
           body: audio
         }).then(response =>{
