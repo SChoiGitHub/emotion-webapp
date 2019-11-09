@@ -1,0 +1,3 @@
+dispatch:
+  - url: "https://emotionwebapp.appspot.com"
+    service: nodejs
