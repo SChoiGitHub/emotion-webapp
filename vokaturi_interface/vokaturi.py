@@ -2,6 +2,7 @@ from flask import Flask, escape, request, jsonify
 from os import environ, path
 from scipy.io.wavfile import read as wav_read
 import sys
+import subprocess
 sys.path.append(path.join(environ["OPENVOKATURI_PATH"],"api"))
 import Vokaturi
 
@@ -13,7 +14,11 @@ except:
 
 app = Flask(__name__)
 
-def getProbabilities(wav_file):
+def getProbabilities(file):
+    wav_file = file+".wav"
+    subprocess.Popen(['ffmpeg', '-i', file, wav_file])
+
+
     (sample_rate, samples) = wav_read(wav_file)
     buffer_length = len(samples)
     c_buffer = Vokaturi.SampleArrayC(buffer_length)
@@ -36,6 +41,8 @@ def getProbabilities(wav_file):
     else:
         data["error"] = "Quality Too Low"
     voice.destroy()
+
+    subprocess.call(['rm', file, wav_file])
     return data
 
 @app.route('/vokaturi/<path:wav_file>')
