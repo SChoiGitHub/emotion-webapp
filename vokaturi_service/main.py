@@ -3,12 +3,13 @@ from os import environ, path
 from scipy.io.wavfile import read as wav_read
 import sys
 import subprocess
-sys.path.append(path.join(environ["OPENVOKATURI_PATH"],"api"))
+import storage
+sys.path.append("./OpenVokaturi/api")
 import Vokaturi
 
 
 try:
-    Vokaturi.load(path.join(environ["OPENVOKATURI_PATH"],"lib/open/linux/OpenVokaturi-3-3-linux64.so"))
+    Vokaturi.load("./OpenVokaturi/lib/open/linux/OpenVokaturi-3-3-linux64.so")
 except:
     sys.exit(0)
 
@@ -45,6 +46,11 @@ def getProbabilities(_file):
     subprocess.Popen(['rm', _file, wav_file])
     return data
 
-@app.route('/vokaturi/<path:wav_file>')
-def vokaturi(wav_file):
-    return jsonify(getProbabilities(wav_file))
+
+@app.route('/vokaturi/<string:blob>')
+def vokaturi(blob):
+    gcs = storage.Client()
+    bucket = gcs.get_bucket(environ['CLOUD_STORAGE_BUCKET'])
+    data_blob = bucket.get_blob(blob)
+    filename = data_blob.download_to_filename(blob+"_data")
+    return getProbabilities(filename)
