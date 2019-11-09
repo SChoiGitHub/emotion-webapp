@@ -1,9 +1,20 @@
 html{
     border: 1px solid grey;
     background-color: honeydew;
+    width: 80vw;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    margin-top: 5vh;
 }
+
 h1{
-    color: burlywood;
+    color: rgb(1, 21, 41);
+    font-family: 'Fira Sans', sans-serif;
+    font-family: 'PT Sans Narrow', sans-serif;
+    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Caveat';
 }
 
 .col-centered{
@@ -11,4 +22,8 @@ h1{
     margin-left: auto;
     margin-right: auto;
     text-align: center;
+  }
+
+  .mic{
+      border-radius: 50%;
   }

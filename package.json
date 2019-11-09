@@ -17,6 +17,7 @@
   "homepage": "https://github.com/SChoiGitHub/emotion-webapp#readme",
   "description": "",
   "dependencies": {
+    "animate.css": "^3.7.2",
     "body-parser": "^1.19.0",
     "ejs": "^2.7.1",
     "express": "^4.17.1",

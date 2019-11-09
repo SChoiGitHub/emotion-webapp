@@ -5,7 +5,8 @@ var bodyParser = require("body-parser");
 const recorder = require('node-record-lpcm16');
 const fs = require('fs');
 
-const app = express()
+
+const app = express();
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, "/public")));
@@ -25,18 +26,17 @@ app.post("/speak", function(req,res){
 
         const file = fs.createWriteStream('test.wav', { encoding: 'binary' })
  
-        recorder.record({
-        sampleRate: 16000
-        })
-        .stream()
-        .pipe(file)
+        record.start().pipe(file)
 
-        setTimeout(() => {
-          recording.stop()
-        }, 3000)
+      // Stop recording after three seconds
+      setTimeout(function () {
+        record.stop()
+      }, 3000)
+
+
 
         res.redirect('/');
     });
 
    
-app.listen(9020)
+app.listen(9030)
