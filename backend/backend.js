@@ -2,14 +2,11 @@ const express = require('express')
 var path = require('path');
 const app = express()
 const axios = require('axios')
+const upload = multer({ dest: './' })
 
 
 
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
+
 
 function getEmotionData(filename){
   return new Promise((resolve,reject) => {
@@ -24,11 +21,21 @@ function getEmotionData(filename){
   }) 
 }
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, "/public")));
 
 app.get('/', function (req, res) {
   res.render('index')
+})
+
+app.post('/analyze',upload.single('audio'), function (req, res, next) {
+  
 })
 
 app.get('*', function(req, res) { 
