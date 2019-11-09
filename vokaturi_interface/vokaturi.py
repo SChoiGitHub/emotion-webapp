@@ -13,8 +13,7 @@ except:
 
 app = Flask(__name__)
 
-@app.route('/vokaturi/<path:wav_file>')
-def vokaturi(wav_file):
+def getProbabilities(wav_file):
     (sample_rate, samples) = wav_read(wav_file)
     buffer_length = len(samples)
     c_buffer = Vokaturi.SampleArrayC(buffer_length)
@@ -37,4 +36,8 @@ def vokaturi(wav_file):
     else:
         data["error"] = "Quality Too Low"
     voice.destroy()
-    return jsonify(data)
+    return data
+
+@app.route('/vokaturi/<path:wav_file>')
+def vokaturi(wav_file):
+    return jsonify(getProbabilities(wav_file))
