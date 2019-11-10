@@ -1,36 +1,40 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel='stylesheet' type='text/css' href='/index.css' />
-    <link rel='stylesheet' type='text/css' href='/animate.css' />
-
-    <title>Emo Web App</title>
-    <script src="https://kit.fontawesome.com/f764015f1b.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
-
-  </head>
- 
-  <body id="body">
-    <div class = "container">
-    <h1 class = "text-center">Emo Web App</h1>   
- 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    
-  </body>
-
-  <script>
+<html>
+<head>
+	<title>Emotion Web App</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel='stylesheet' type='text/css' href='/index.css' />
+	<link rel='stylesheet' type='text/css' href='/animate.css' />
+</head>
+<body id="body" class="text-center">
+    <header class="row align-items-top">
+      <div class="col-6 mx-auto">
+        <h1 class = "inner text-center">Emotion Web App</h1> 
+      </div>
+    </header>
+  <div class="container-fluid body-content">
+    <div class="row align-items-center">
+      <div class="col-6 mx-auto">
+        <h5>Approve the use of the microphone!</h5>
+        <p>Afterwards, talk to me! The background should reflect your perceived emotion.</p>
+      </div>
+    </div>
+  </div>
+  <footer class="row align-items-bottom">
+    <div class="col-6 mx-auto">
+      <h3 class = "inner text-center">How do you feel?</h3> 
+    </div>
+  </footer>
+</body>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
     const MS_BETWEEN_UPDATES = 3000
     const EMOTION_HISTORY_LIMIT = 4
     var emotion_history = []
     var recordedChunks = [];
     var mediaRecorder;
     var options = {mimeType: 'audio/webm'};
+    var mood_color;
 
 function runningAverage(input_data){
     emotion_history.push(input_data)
@@ -59,37 +63,55 @@ function runningAverage(input_data){
     return aggregated_data;
 }
 
+function weightedTuple(weight,tuple){
+  new_tuple = []
+  tuple.forEach(i => {
+    new_tuple.push(i*weight)
+  })
+  return new_tuple
+}
+
+
+function sum_tuples(tuples){
+  new_tuple = [0.0,0.0,0.0]
+  tuples.forEach(tuple => {
+    new_tuple[0] += tuple[0];
+    new_tuple[1] += tuple[1];
+    new_tuple[2] += tuple[2];
+  })
+  new_tuple[0] =  Math.floor(new_tuple[0])
+  new_tuple[1] =  Math.floor(new_tuple[1])
+  new_tuple[2] =  Math.floor(new_tuple[2])
+  return new_tuple
+}
+
+function averageMood(data){
+
+  var _anger = weightedTuple(data["anger"],[255.0,0.0,0.0])
+  var _fear = weightedTuple(data["fear"],[111.0, 45.0, 168.0])
+  var _happiness = weightedTuple(data["happiness"],[255.0, 255.0, 0.0])
+  var _sadness = weightedTuple(data["sadness"],[51.0, 51.0, 153.0])
+  var _neutral = weightedTuple(data["neutral"],[51.0, 51.0, 153.0])
+  console.log(_anger)
+  console.log(_fear)
+  console.log(_happiness)
+  console.log(_sadness)
+  console.log(_neutral)
+  var average_data = sum_tuples([_anger,_fear,_happiness,_sadness,_neutral])
+  return "rgb("+average_data[0]+","+average_data[1]+","+average_data[2]+")";
+
+}
+
 function processEmotions(new_data){
   if(!("error" in new_data)){
     var data = runningAverage(new_data)
-	var anger = data["anger"];
-	var fear = data["fear"];
-	var happy = data["happiness"];
-	var sad = data["sadness"];
+    var anger = data["anger"];
+    var fear = data["fear"];
+    var happy = data["happiness"];
+    var sad = data["sadness"];
 	var neutral = data["neutral"];
-	var mood = Math.max(anger,fear,happy,sad,neutral);
-	if(mood==anger){
-		$("#body").css("background-color","red")
-	}
-	else if(mood==fear){
-		$("#body").css("background-color","purple")
-	}
-	else if(mood==happy){
-		$("#body").css("background-color","yellow")
-	}
-	else if(mood==sad){
-		$("#body").css("background-color","blue")
-	}
-	else if(mood==neutral){
-		$("#body").css("background-color","grey")
-	}
-	else{
-		console.log("processEmotions Error");
-	}
-    /*if(data["anger"] > 0.5){//prototype code
-      $("#body").css("background-color","red")
-
-    }*/
+    mood_color = averageMood(data)
+    $("#body").css("background-color",mood_color)    
   }
 }
 
@@ -166,7 +188,6 @@ function processEmotions(new_data){
 			color:"grey",
 			dataPoints: dps4
 		}
-	*/
 		]
 	});
 
@@ -191,9 +212,9 @@ function processEmotions(new_data){
 			yVal4 = data["sadness"];
 			//dps.push({x: xVal,y: yVal});
 			dps0.push({x: xVal,y: yVal0});
-			dps1.push({x: xVal,y: yVal1}});
-			dps2.push({x: xVal,y: yVal2}});
-			dps3.push({x: xVal,y: yVal3}});
+			dps1.push({x: xVal,y: yVal1});
+			dps2.push({x: xVal,y: yVal2});
+			dps3.push({x: xVal,y: yVal3});
 			dps4.push({x: xVal,y: yVal4});
 			
 			xVal++;
@@ -218,4 +239,5 @@ function processEmotions(new_data){
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .then(handleSuccess);
   </script>
+
 </html>
