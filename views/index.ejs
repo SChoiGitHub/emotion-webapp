@@ -88,10 +88,6 @@ function processEmotions(new_data){
 	else{
 		console.log("processEmotions Error");
 	}
-    /*if(data["anger"] > 0.5){//prototype code
-      $("#body").css("background-color","red")
-
-    }*/
   }
 }
 
@@ -129,91 +125,126 @@ function processEmotions(new_data){
 	
 	window.onload = function () {
 
-	var dps0 = [];// dataPoints
-	var dps1 = [];
-	var dps2 = [];
-	var dps3 = [];
-	var dps4 = [];
-	
+	var dataPoints1 = [];
+	var dataPoints2 = [];
+	var dataPoints3 = [];
+	var dataPoints4 = [];
+	var dataPoints5 = [];
+
 	var chart = new CanvasJS.Chart("chartContainer", {
-		title :{
+		zoomEnabled: true,
+		title: {
 			text: "Mood Data"
 		},
-		axisY: {
+		axisY:{
 			includeZero: true
-		},      
-		data: [{
+		}, 
+		toolTip: {
+			shared: true
+		},
+		legend: {
+			cursor:"pointer",
+			verticalAlign: "top",
+			fontSize: 22,
+			fontColor: "dimGrey",
+			itemclick : toggleDataSeries
+		},
+		data: [{ 
 			type: "line",
+			showInLegend: true,
 			name: "Anger",
-			color:"red",
-			dataPoints: dps0
-		},{
+			dataPoints: dataPoints1
+		},
+		{				
 			type: "line",
-			name: "Fear",
-			color:"purple",
-			dataPoints: dps1
-		},{
+			showInLegend: true,
+			name: "Fear" ,
+			dataPoints: dataPoints2
+		},
+		{
 			type: "line",
-			name: "Happiness",
-			color:"yellow",
-			dataPoints: dps2
-		},{
+			showInLegend: true,
+			name: "Happiness" ,
+			dataPoints: dataPoints3
+		},
+		{
 			type: "line",
-			name: "Sadness",
-			color:"blue",
-			dataPoints: dps3
-		},{
+			showInLegend: true,
+			name: "Sadness" ,
+			dataPoints: dataPoints4
+		},
+		{
 			type: "line",
-			name: "Neutral",
-			color:"grey",
-			dataPoints: dps4
-		}
-	*/
-		]
+			showInLegend: true,
+			name: "Neutral" ,
+			dataPoints: dataPoints5
+		}]
 	});
 
-	var xVal = 0;
-	var yVal0 = 0; 
-	var yVal1 = 0;
-	var yVal2 = 0;
-	var yVal3 = 0;
-	var yVal4 = 0;
-	var updateInterval = 3000;
-	var dataLength = 10; // number of dataPoints visible at any point
-
-	var updateChart = function (count) {
-
-		count = count || 1;
-
-		for (var j = 0; j < count; j++) {
-			yVal0 = data["anger"]
-			yVal1 = data["fear"];
-			yVal2 = data["happiness"];
-			yVal3 = data["neutral"];
-			yVal4 = data["sadness"];
-			//dps.push({x: xVal,y: yVal});
-			dps0.push({x: xVal,y: yVal0});
-			dps1.push({x: xVal,y: yVal1}});
-			dps2.push({x: xVal,y: yVal2}});
-			dps3.push({x: xVal,y: yVal3}});
-			dps4.push({x: xVal,y: yVal4});
-			
-			xVal++;
+	function toggleDataSeries(e) {
+		if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+			e.dataSeries.visible = false;
 		}
-
-		if (dps.length > dataLength) {
-			dps0.shift();
-			dps1.shift();
-			dps2.shift();
-			dps3.shift();
-			dps4.shift();
+		else {
+			e.dataSeries.visible = true;
 		}
-
 		chart.render();
-	};
+	}
 
-	updateChart(dataLength);
+	var updateInterval = 3000;
+	// initial value
+	xVal=0;
+	var yValue1 = 1; 
+	var yValue2 = 1;
+	var yValue3 = 1;
+	var yValue4 = 1;
+	var yValue5 = 1;
+
+	function updateChart(count) {
+		count = count || 1;
+		for (var i = 0; i < count; i++) {
+			yValue1 = data["anger"];
+			yValue2 = data["fear"];
+			yValue3 = data["happiness"];
+			yValue4 = data["neutral"];
+			yValue5 = data["sadness"];
+
+			// pushing the new values
+			dataPoints1.push({
+				x: xVal,
+				y: yValue1
+			});
+			dataPoints2.push({
+				x: xVal,
+				y: yValue2
+			});
+			dataPoints3.push({
+				x: xVal,
+				y: yValue3
+			});
+			dataPoints4.push({
+				x: xVal,
+				y: yValue4
+			});
+			dataPoints5.push({
+				x: xVal,
+				y: yValue5
+			});
+		}
+		xVal++;
+
+		// updating legend text with  updated with y Value 
+		chart.options.data[0].legendText = " Anger" + yValue1;
+		chart.options.data[1].legendText = " Fear" + yValue2; 
+		chart.options.data[2].legendText = " Happiness" + yValue3;
+		chart.options.data[3].legendText = " Sadness" + yValue4;
+		chart.options.data[4].legendText = " Neutral" + yValue5; 
+		chart.render();
+	}
+	// generates first set of dataPoints 
+	updateChart(1000);	
 	setInterval(function(){updateChart()}, updateInterval);
+
 	}
 	
 
