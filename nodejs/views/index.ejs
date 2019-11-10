@@ -30,7 +30,6 @@
     var emotion_history = []
     var recordedChunks = [];
     var mediaRecorder;
-    var res
     var options = {mimeType: 'audio/webm'};
 
 function runningAverage(input_data){
@@ -63,7 +62,6 @@ function runningAverage(input_data){
 function processEmotions(new_data){
   if(!("error" in new_data)){
     var data = runningAverage(new_data)
-    console.log(data)
 	var anger = data["anger"];
 	var fear = data["fear"];
 	var happy = data["happiness"];

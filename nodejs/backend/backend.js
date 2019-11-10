@@ -41,7 +41,7 @@ app.get('/', function (req, res) {
 
 app.post('/analyze',upload.single('data'), function (req, res, next) {
   var filename = Date.now().toString()
-  const file = bucket.file()
+  const file = bucket.file(filename)
   const stream = file.createWriteStream({
     metadata: {
       contentType: req.file.mimetype
