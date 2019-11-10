@@ -100,20 +100,21 @@ function processEmotions(new_data){
       mediaRecorder.ondataavailable = function(e) {
         if (e.data.size > 0) {
           recordedChunks.push(e.data);
-		if(recordedChunks.length != 0){
-		  var audio_blob = new Blob(recordedChunks, {type:'audio/webm'})
-		  var audio = new FormData();
-		  audio.append('audio', audio_blob);
-		  fetch('/analyze', {
-		    method : 'POST',
-		    body: audio
-		  }).then(r =>{
-		    r.json().then(data => {
-		      processEmotions(data)
-		    })
-		  })
-		  recordedChunks = [];
-		}
+          if(recordedChunks.length != 0){
+            var audio_blob = new Blob(recordedChunks, {type:'audio/webm'})
+            var audio = new FormData();
+            console.log(recordedChunks)
+            audio.append('data', audio_blob);
+            fetch('/analyze', {
+              method : 'POST',
+              body: audio
+            }).then(r =>{
+              r.json().then(data => {
+                processEmotions(data)
+              })
+            })
+            recordedChunks = [];
+          }
         }
       }
       mediaRecorder.start();

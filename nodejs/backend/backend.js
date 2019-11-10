@@ -14,19 +14,15 @@ const upload = Multer({ storage: Multer.memoryStorage()})
 
 
 
-function getEmotionData(blob_name){
+function getEmotionData(filename){
   return new Promise((resolve,reject) => {
-    const blob = bucket.file(blob_name)
-    const blobStream = blob.createWriteStream();
-
-    blobStream.on('err', () => {
-      reject({a:"2214"})
-    });
-    blobStream.on('finish', () => {
-      console.log(`https://storage.googleapis.com/`,bucket.name,blob.name);
-      resolve({a:"2"})
-    });
-    blobStream.end(blob_name);
+    axios.get("https://vokaturi-dot-emotionwebapp.appspot.com/vokaturi/"+filename)
+    .then(response => {
+      resolve(response.data)
+    })
+    .catch(() => {
+      reject("error")
+    })
   }) 
 }
 
@@ -43,12 +39,26 @@ app.get('/', function (req, res) {
   res.render('index')
 })
 
-app.post('/analyze',upload.single('audio'), function (req, res, next) {
-  console.log(req.file)
-  getEmotionData(req.file.originalname)
-  .then(r =>{
-    res.json(r)
+app.post('/analyze',upload.single('data'), function (req, res, next) {
+  var filename = Date.now().toString()
+  const file = bucket.file()
+  const stream = file.createWriteStream({
+    metadata: {
+      contentType: req.file.mimetype
+    },
+    resumable: false
   })
+  stream.on('error', (err) => {
+    req.file.cloudStorageError = err;
+    next(err);
+  });
+  stream.on('finish', () => {
+    getEmotionData(filename)
+    .then(r =>{
+      res.json(r)
+    })
+  });
+  stream.end(req.file.buffer);
 })
 
 app.get('*', function(req, res) { 
