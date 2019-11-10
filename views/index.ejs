@@ -173,7 +173,11 @@ function processEmotions(new_data){
 	});
 
 	var xVal = 0;
-	var yVal = 0; 
+	var yVal0 = 0; 
+	var yVal1 = 0;
+	var yVal2 = 0;
+	var yVal3 = 0;
+	var yVal4 = 0;
 	var updateInterval = 3000;
 	var dataLength = 10; // number of dataPoints visible at any point
 
@@ -182,17 +186,17 @@ function processEmotions(new_data){
 		count = count || 1;
 
 		for (var j = 0; j < count; j++) {
-			//yVal = data["anger"];//var yValA = data["anger"]
-			//yValF = data["fear"];
-			//yValH = data["happiness"];
-			//yValN = data["neutral"];
-			//yValS = data["sadness"];
+			yVal0 = data["anger"]
+			yVal1 = data["fear"];
+			yVal2 = data["happiness"];
+			yVal3 = data["neutral"];
+			yVal4 = data["sadness"];
 			//dps.push({x: xVal,y: yVal});
-			dps0.push({x: xVal,y: data["anger"]});
-			dps1.push({x: xVal,y: data["fear"]});
-			dps2.push({x: xVal,y: data["happiness"]});
-			dps3.push({x: xVal,y: data["neutral"]});
-			dps4.push({x: xVal,y: data["sadness"]});
+			dps0.push({x: xVal,y: yVal0});
+			dps1.push({x: xVal,y: yVal1}});
+			dps2.push({x: xVal,y: yVal2}});
+			dps3.push({x: xVal,y: yVal3}});
+			dps4.push({x: xVal,y: yVal4});
 			
 			xVal++;
 		}
