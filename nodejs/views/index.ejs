@@ -93,6 +93,8 @@ function processEmotions(new_data){
   }
 }
 
+
+
     const handleSuccess = function(stream) {
       mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorder.ondataavailable = function(e) {
@@ -121,6 +123,97 @@ function processEmotions(new_data){
         mediaRecorder.start()
       },MS_BETWEEN_UPDATES)
     };
+	
+	
+	window.onload = function () {
+
+	var dps0 = [];// dataPoints
+	var dps1 = [];
+	var dps2 = [];
+	var dps3 = [];
+	var dps4 = [];
+	
+	var chart = new CanvasJS.Chart("chartContainer", {
+		title :{
+			text: "Mood Data"
+		},
+		axisY: {
+			includeZero: true
+		},      
+		data: [{
+			type: "line",
+			name: "Anger",
+			color:"red",
+			dataPoints: dps0
+		},{
+			type: "line",
+			name: "Fear",
+			color:"purple",
+			dataPoints: dps1
+		},{
+			type: "line",
+			name: "Happiness",
+			color:"yellow",
+			dataPoints: dps2
+		},{
+			type: "line",
+			name: "Sadness",
+			color:"blue",
+			dataPoints: dps3
+		},{
+			type: "line",
+			name: "Neutral",
+			color:"grey",
+			dataPoints: dps4
+		}
+	*/
+		]
+	});
+
+	var xVal = 0;
+	var yVal0 = 0; 
+	var yVal1 = 0;
+	var yVal2 = 0;
+	var yVal3 = 0;
+	var yVal4 = 0;
+	var updateInterval = 3000;
+	var dataLength = 10; // number of dataPoints visible at any point
+
+	var updateChart = function (count) {
+
+		count = count || 1;
+
+		for (var j = 0; j < count; j++) {
+			yVal0 = data["anger"]
+			yVal1 = data["fear"];
+			yVal2 = data["happiness"];
+			yVal3 = data["neutral"];
+			yVal4 = data["sadness"];
+			//dps.push({x: xVal,y: yVal});
+			dps0.push({x: xVal,y: yVal0});
+			dps1.push({x: xVal,y: yVal1}});
+			dps2.push({x: xVal,y: yVal2}});
+			dps3.push({x: xVal,y: yVal3}});
+			dps4.push({x: xVal,y: yVal4});
+			
+			xVal++;
+		}
+
+		if (dps.length > dataLength) {
+			dps0.shift();
+			dps1.shift();
+			dps2.shift();
+			dps3.shift();
+			dps4.shift();
+		}
+
+		chart.render();
+	};
+
+	updateChart(dataLength);
+	setInterval(function(){updateChart()}, updateInterval);
+	}
+	
 
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .then(handleSuccess);
