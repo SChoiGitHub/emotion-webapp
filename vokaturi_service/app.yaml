@@ -1,0 +1,6 @@
+runtime: python37
+service: vokaturi
+entrypoint: gunicorn -b :$PORT main:app
+
+env_variables:
+    CLOUD_STORAGE_BUCKET: your-bucket-name

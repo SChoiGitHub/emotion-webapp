@@ -1,24 +1,32 @@
 from flask import Flask, escape, request, jsonify
 from os import environ, path
 from scipy.io.wavfile import read as wav_read
+from google.cloud import storage
 import sys
 import subprocess
-sys.path.append(path.join(environ["OPENVOKATURI_PATH"],"api"))
+import urllib
+sys.path.append("./OpenVokaturi/api")
 import Vokaturi
 
 
+storage_client = storage.Client()
+bucket = storage_client.get_bucket("emotionwebapp")
+
 try:
-    Vokaturi.load(path.join(environ["OPENVOKATURI_PATH"],"lib/open/linux/OpenVokaturi-3-3-linux64.so"))
+    Vokaturi.load("./OpenVokaturi/lib/open/linux/OpenVokaturi-3-3-linux64.so")
 except:
     sys.exit(0)
 
 app = Flask(__name__)
 
-def getProbabilities(_file):
-    wav_file = _file+".wav"
-    subprocess.call(['ffmpeg', '-i', _file, wav_file])
+def getProbabilities(blob_name):
+    local_file = "/tmp/"+blob_name
+    wav_file = "/tmp/"+blob_name+".wav"
+    _blob = bucket.blob(blob_name)
+    _blob.download_to_filename(local_file)
+    subprocess.call(['ffmpeg', '-i', local_file, wav_file])
 
-
+    
     (sample_rate, samples) = wav_read(wav_file)
     buffer_length = len(samples)
     c_buffer = Vokaturi.SampleArrayC(buffer_length)
@@ -42,9 +50,10 @@ def getProbabilities(_file):
         data["error"] = "Quality Too Low"
     voice.destroy()
 
-    subprocess.Popen(['rm', _file, wav_file])
+    subprocess.Popen(['rm', local_file, wav_file])
     return data
 
-@app.route('/vokaturi/<path:wav_file>')
-def vokaturi(wav_file):
-    return jsonify(getProbabilities(wav_file))
+
+@app.route('/vokaturi/<string:blob>')
+def vokaturi(blob):
+    return getProbabilities(blob)

@@ -1,0 +1,243 @@
+<!doctype html>
+<html>
+<head>
+	<title>Emotion Web App</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel='stylesheet' type='text/css' href='/index.css' />
+	<link rel='stylesheet' type='text/css' href='/animate.css' />
+</head>
+<body id="body" class="text-center">
+    <header class="row align-items-top">
+      <div class="col-6 mx-auto">
+        <h1 class = "inner text-center">Emotion Web App</h1> 
+      </div>
+    </header>
+  <div class="container-fluid body-content">
+    <div class="row align-items-center">
+      <div class="col-6 mx-auto">
+        <h5>Approve the use of the microphone!</h5>
+        <p>Afterwards, talk to me! The background should reflect your perceived emotion.</p>
+      </div>
+    </div>
+  </div>
+  <footer class="row align-items-bottom">
+    <div class="col-6 mx-auto">
+      <h3 class = "inner text-center">How do you feel?</h3> 
+    </div>
+  </footer>
+</body>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
+    const MS_BETWEEN_UPDATES = 3000
+    const EMOTION_HISTORY_LIMIT = 4
+    var emotion_history = []
+    var recordedChunks = [];
+    var mediaRecorder;
+    var options = {mimeType: 'audio/webm'};
+    var mood_color;
+
+function runningAverage(input_data){
+    emotion_history.push(input_data)
+    if(emotion_history.length > EMOTION_HISTORY_LIMIT){
+      emotion_history=emotion_history.slice(1)
+    }
+    var aggregated_data = {
+	anger:0.0,
+	fear:0.0,
+	happiness:0.0,
+	neutral:0.0,
+	sadness:0.0,
+    };
+    emotion_history.forEach(item =>{
+      aggregated_data["anger"] += item["anger"]
+      aggregated_data["fear"] += item["fear"]
+      aggregated_data["happiness"] += item["happiness"]
+      aggregated_data["neutral"] += item["neutral"]
+      aggregated_data["sadness"] += item["sadness"]
+    })
+    aggregated_data["anger"] /= emotion_history.length
+    aggregated_data["fear"] /= emotion_history.length
+    aggregated_data["happiness"] /= emotion_history.length
+    aggregated_data["neutral"] /= emotion_history.length
+    aggregated_data["sadness"] /= emotion_history.length
+    return aggregated_data;
+}
+
+function weightedTuple(weight,tuple){
+  new_tuple = []
+  tuple.forEach(i => {
+    new_tuple.push(i*weight)
+  })
+  return new_tuple
+}
+
+
+function sum_tuples(tuples){
+  new_tuple = [0.0,0.0,0.0]
+  tuples.forEach(tuple => {
+    new_tuple[0] += tuple[0];
+    new_tuple[1] += tuple[1];
+    new_tuple[2] += tuple[2];
+  })
+  new_tuple[0] =  Math.floor(new_tuple[0])
+  new_tuple[1] =  Math.floor(new_tuple[1])
+  new_tuple[2] =  Math.floor(new_tuple[2])
+  return new_tuple
+}
+
+function averageMood(data){
+
+  var _anger = weightedTuple(data["anger"],[255.0,0.0,0.0])
+  var _fear = weightedTuple(data["fear"],[111.0, 45.0, 168.0])
+  var _happiness = weightedTuple(data["happiness"],[255.0, 255.0, 0.0])
+  var _sadness = weightedTuple(data["sadness"],[51.0, 51.0, 153.0])
+  var _neutral = weightedTuple(data["neutral"],[51.0, 51.0, 153.0])
+  console.log(_anger)
+  console.log(_fear)
+  console.log(_happiness)
+  console.log(_sadness)
+  console.log(_neutral)
+  var average_data = sum_tuples([_anger,_fear,_happiness,_sadness,_neutral])
+  return "rgb("+average_data[0]+","+average_data[1]+","+average_data[2]+")";
+
+}
+
+function processEmotions(new_data){
+  if(!("error" in new_data)){
+    var data = runningAverage(new_data)
+    var anger = data["anger"];
+    var fear = data["fear"];
+    var happy = data["happiness"];
+    var sad = data["sadness"];
+	var neutral = data["neutral"];
+    mood_color = averageMood(data)
+    $("#body").css("background-color",mood_color)    
+  }
+}
+
+
+
+    const handleSuccess = function(stream) {
+      mediaRecorder = new MediaRecorder(stream, options);
+      mediaRecorder.ondataavailable = function(e) {
+        if (e.data.size > 0) {
+          recordedChunks.push(e.data);
+          if(recordedChunks.length != 0){
+            var audio_blob = new Blob(recordedChunks, {type:'audio/webm'})
+            var audio = new FormData();
+            audio.append('data', audio_blob);
+            fetch('/analyze', {
+              method : 'POST',
+              body: audio
+            }).then(r => {
+              r.json().then(data => {
+                processEmotions(data)
+              })
+            })
+            recordedChunks = [];
+          }
+        }
+      }
+      mediaRecorder.start();
+
+      setInterval( () => {
+        mediaRecorder.stop()
+        mediaRecorder.start()
+      },MS_BETWEEN_UPDATES)
+    };
+	
+	
+	window.onload = function () {
+
+	var dps0 = [];// dataPoints
+	var dps1 = [];
+	var dps2 = [];
+	var dps3 = [];
+	var dps4 = [];
+	
+	var chart = new CanvasJS.Chart("chartContainer", {
+		title :{
+			text: "Mood Data"
+		},
+		axisY: {
+			includeZero: true
+		},      
+		data: [{
+			type: "line",
+			name: "Anger",
+			color:"red",
+			dataPoints: dps0
+		},{
+			type: "line",
+			name: "Fear",
+			color:"purple",
+			dataPoints: dps1
+		},{
+			type: "line",
+			name: "Happiness",
+			color:"yellow",
+			dataPoints: dps2
+		},{
+			type: "line",
+			name: "Sadness",
+			color:"blue",
+			dataPoints: dps3
+		},{
+			type: "line",
+			name: "Neutral",
+			color:"grey",
+			dataPoints: dps4
+		}
+		]
+	});
+
+	var xVal = 0;
+	var yVal0 = 0; 
+	var yVal1 = 0;
+	var yVal2 = 0;
+	var yVal3 = 0;
+	var yVal4 = 0;
+	var updateInterval = 3000;
+	var dataLength = 10; // number of dataPoints visible at any point
+
+	var updateChart = function (count) {
+
+		count = count || 1;
+
+		for (var j = 0; j < count; j++) {
+			yVal0 = data["anger"]
+			yVal1 = data["fear"];
+			yVal2 = data["happiness"];
+			yVal3 = data["neutral"];
+			yVal4 = data["sadness"];
+			//dps.push({x: xVal,y: yVal});
+			dps0.push({x: xVal,y: yVal0});
+			dps1.push({x: xVal,y: yVal1});
+			dps2.push({x: xVal,y: yVal2});
+			dps3.push({x: xVal,y: yVal3});
+			dps4.push({x: xVal,y: yVal4});
+			
+			xVal++;
+		}
+
+		if (dps.length > dataLength) {
+			dps0.shift();
+			dps1.shift();
+			dps2.shift();
+			dps3.shift();
+			dps4.shift();
+		}
+
+		chart.render();
+	};
+
+	updateChart(dataLength);
+	setInterval(function(){updateChart()}, updateInterval);
+	}
+	
+
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(handleSuccess);
+  </script>
+
+</html>
