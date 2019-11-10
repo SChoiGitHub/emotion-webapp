@@ -103,12 +103,11 @@ function processEmotions(new_data){
           if(recordedChunks.length != 0){
             var audio_blob = new Blob(recordedChunks, {type:'audio/webm'})
             var audio = new FormData();
-            console.log(recordedChunks)
             audio.append('data', audio_blob);
             fetch('/analyze', {
               method : 'POST',
               body: audio
-            }).then(r =>{
+            }).then(r => {
               r.json().then(data => {
                 processEmotions(data)
               })
